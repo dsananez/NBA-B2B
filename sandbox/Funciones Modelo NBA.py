@@ -339,3 +339,5 @@ def churn_24(df):
 
 
 churn_24(data3)
+
+PRUEBA
