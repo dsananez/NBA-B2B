@@ -1,0 +1,6 @@
+tipo_oferta,cost_hora_pos,dur_llam_in,dur_llam_out,efic_rep
+cater,162,0.07,0.07,1
+descuento,162,0.02,0.02,1
+up_sell,162,0.08,0.06,1
+cross_sell,162,0.02,0.02,1
+bono,162,0.02,0.02,1

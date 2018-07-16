@@ -1,0 +1,7 @@
+id_oferta,tipo_oferta,fact_esp,tipo_fact,churn_esp_n1,tipo_churn,aceptacion_in,aceptacion_out,subsidio,logistica,comisiones
+cater_30_gama1,cater,0.00,delta,0.005,fijo,0.035,0.035,816,300,445.5
+desc_50_12,descuento,-0.50,aumento_porct,-0.9,aumento_porct,0.7,0.85,0,0,2.7
+desc_15_indef,descuento,-0.15,aumento_porct,-0.9,aumento_porct,0.6,0.88,0,0,2.7
+upsell_mod,up_sell,0.10,aumento_porct,-0.3,aumento_porct,0.1,0.15,0,0,2.7
+cross_mod,cross_sell,0.10,aumento_porct,-0.3,aumento_porct,0.1,0.15,0,0,2.7
+bono_2g_6,bono,-0.06,aumento_porct,-0.5,aumento_porct,0.5,0.85,0,0,2.7
