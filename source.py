@@ -14,9 +14,9 @@ def costo_plataforma(df, t_util = 8, efic_rep = 0.75, dias_lab = 6, q_sem = 4):
     ofertas = pd.read_csv('modelo_plataforma_cc.txt', sep=",")
     ofertas['cost_plat_in'] = 0
     ofertas['cost_plat_out'] = ofertas['cost_hora_pos']*ofertas['dur_llam_out']/ofertas['efic_rep']
-    
+
     result = pd.merge(df, ofertas, on = 'tipo_oferta', how = 'left')
-    
+
     return result[['cost_plat_in','cost_plat_out']]
 
 def costo_sac(df):
@@ -41,8 +41,10 @@ def costo_campana(df):
             - cost_sac
         :return:
      """
-    cost_campana = {'cost_campana_in': df['cost_plat_in'] + df['cost_sac'], 
-                    'cost_campana_out': df['cost_plat_out'] + df['cost_sac']}
+    cost_campana = {'cost_campana_in': df['cost_plat_in'],
+                    'cost_campana_out': df['cost_plat_out'],
+                    'cost_sac': df['cost_sac']}
+
     cost_campana_df = pd.DataFrame(data=cost_campana)
     return cost_campana_df
 
@@ -56,7 +58,7 @@ def costo_total(df, t_util = 8, efic_rep = 0.75, dias_lab = 6, q_sem = 4):
         q_sem: cantidad de semanas al mes
     :return:
     """
-    
+
     cost_plat = costo_plataforma(df, t_util, efic_rep, dias_lab, q_sem)
     cost_sac = costo_sac(df)
     cost_campana = costo_campana(pd.concat([cost_plat, cost_sac], axis=1))
@@ -65,149 +67,149 @@ def costo_total(df, t_util = 8, efic_rep = 0.75, dias_lab = 6, q_sem = 4):
 def fact_24(df):
     """
     Calcula facturacion estimada proximos 24 meses, donde
-        df: data frame con columnas: 
+        df: data frame con columnas:
             - msisdn_id: ani del cliente
             - fact: facturacion plan + excedentes
         listado_campanas.txt: archivo de texto con informacion de las campañas
     :return:
     """
-    
+
     fact_oferta = {}
     ofertas = pd.read_csv('listado_campanas.txt', sep=",")
-    
+
     for i in range(0,len(ofertas)):
         fact_esp = ofertas['fact_esp'][i]
         fact = np.array([], dtype=np.float).reshape(0,24)
-        
+
         if ofertas['tipo_oferta'][i] == 'cater':
-            
+
             if ofertas['tipo_fact'][i] == 'delta':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, 12)) + list(np.repeat(df['fact'][k], 12)) 
+                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, 12)) + list(np.repeat(df['fact'][k], 12))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'aumento_porct':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), 12)) + list(np.repeat(df['fact'][k], 12)) 
+                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), 12)) + list(np.repeat(df['fact'][k], 12))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'fijo':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(fact_esp, 12)) + list(np.repeat(df['fact'][k], 12)) 
+                    fact_24 = list(np.repeat(fact_esp, 12)) + list(np.repeat(df['fact'][k], 12))
                     fact = np.vstack([fact, fact_24])
-        
+
         elif ofertas['tipo_oferta'][i] == 'bono':
-            
+
             duracion = int(ofertas['id_oferta'][i].split('_')[2])
-            
+
             if ofertas['tipo_fact'][i] == 'delta':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion)) 
+                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'aumento_porct':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), duracion)) + list(np.repeat(df['fact'][k], 24-duracion)) 
+                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), duracion)) + list(np.repeat(df['fact'][k], 24-duracion))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'fijo':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion)) 
+                    fact_24 = list(np.repeat(fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion))
                     fact = np.vstack([fact, fact_24])
-                    
+
         elif ofertas['tipo_oferta'][i] == 'cross_sell':
-    
+
             if ofertas['tipo_fact'][i] == 'delta':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, 24)) 
+                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, 24))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'aumento_porct':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), 24)) 
+                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), 24))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'fijo':
                 for k in range(0,len(df)):
                     fact_24 = list(np.repeat(fact_esp, 24))
                     fact = np.vstack([fact, fact_24])
-        
+
         elif ofertas['tipo_oferta'][i] == 'up_sell':
-    
+
             if ofertas['tipo_fact'][i] == 'delta':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, 24)) 
+                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, 24))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'aumento_porct':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), 24)) 
+                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), 24))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'fijo':
                 for k in range(0,len(df)):
                     fact_24 = list(np.repeat(fact_esp, 24))
                     fact = np.vstack([fact, fact_24])
-                    
+
         elif ofertas['tipo_oferta'][i] == 'descuento':
-            
+
             if ofertas['id_oferta'][i].split('_')[2] == 'indef':
                 duracion = 24
             else:
                 duracion = int(ofertas['id_oferta'][i].split('_')[2])
-            
+
             if ofertas['tipo_fact'][i] == 'delta':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion)) 
+                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'aumento_porct':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), duracion)) + list(np.repeat(df['fact'][k], 24-duracion)) 
+                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), duracion)) + list(np.repeat(df['fact'][k], 24-duracion))
                     fact = np.vstack([fact, fact_24])
             elif ofertas['tipo_fact'][i] == 'fijo':
                 for k in range(0,len(df)):
-                    fact_24 = list(np.repeat(fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion)) 
-                    fact = np.vstack([fact, fact_24])                    
-        
-                    
+                    fact_24 = list(np.repeat(fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion))
+                    fact = np.vstack([fact, fact_24])
+
+
         fact_oferta[ofertas['id_oferta'][i]] = pd.concat([df['msisdn_id'], pd.DataFrame(data=fact)], axis=1)
-        
+
     return fact_oferta
 
 def churn_post_oferta(churn_orig, churn_nvo, dur_oferta, progresivo = True):
     """
     Calcula churn estimado al vencimiento de una oferta, donde
-        churn_orig: churn antes de aceptar la oferta 
-        churn_nvo: churn despues de aceptar la oferta 
+        churn_orig: churn antes de aceptar la oferta
+        churn_nvo: churn despues de aceptar la oferta
         dur_oferta: duracion de la oferta (meses)
         dur_blindaje: duracion del blindaje
     :return:
     """
     churn_of = list(np.repeat(churn_nvo, dur_oferta))
-   
+
     churn_blin = list()
-    
+
     if progresivo:
         churn_n = churn_nvo*1.1
         while churn_n < churn_orig and len(churn_blin) < 24 - dur_oferta:
             churn_blin.append(churn_n)
             churn_n = churn_n*1.1
-    
+
     churn_po = list(np.repeat(churn_orig, 24 - dur_oferta - len(churn_blin)))
-    
+
     return churn_of + churn_blin + churn_po
 
 def churn_24(df):
     """
     Calcula churn estimado proximos 24 meses, donde
-        df: data frame con columnas: 
+        df: data frame con columnas:
             - msisdn_id: ani del cliente
             - churn_calibrated: churn mensual calibrado (probabilidad real)
         listado_campanas.txt: archivo de texto con informacion de las campañas
     :return:
     """
-    
+
     churn_oferta = {}
     ofertas = pd.read_csv('listado_campanas.txt', sep=",")
-    
+
     for i in range(0,len(ofertas)):
         churn_esp = ofertas['churn_esp_n1'][i]
         churn = np.array([], dtype=np.float).reshape(0,24)
-        
+
         if ofertas['tipo_oferta'][i] == 'cater':
-            
+
             if ofertas['tipo_churn'][i] == 'delta':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
@@ -226,11 +228,11 @@ def churn_24(df):
                     churn_nvo = churn_esp
                     churn_24 = churn_post_oferta(churn_orig, churn_nvo, 12)
                     churn = np.vstack([churn, churn_24])
-        
+
         elif ofertas['tipo_oferta'][i] == 'bono':
-            
+
             duracion = int(ofertas['id_oferta'][i].split('_')[2])
-            
+
             if ofertas['tipo_churn'][i] == 'delta':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
@@ -249,9 +251,9 @@ def churn_24(df):
                     churn_nvo = churn_esp
                     churn_24 = churn_post_oferta(churn_orig, churn_nvo, duracion)
                     churn = np.vstack([churn, churn_24])
-                    
+
         elif ofertas['tipo_oferta'][i] == 'cross_sell':
-    
+
             if ofertas['tipo_churn'][i] == 'delta':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
@@ -270,9 +272,9 @@ def churn_24(df):
                     churn_nvo = churn_esp
                     churn_24 = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False)
                     churn = np.vstack([churn, churn_24])
-        
+
         elif ofertas['tipo_oferta'][i] == 'up_sell':
-    
+
             if ofertas['tipo_churn'][i] == 'delta':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
@@ -291,14 +293,14 @@ def churn_24(df):
                     churn_nvo = churn_esp
                     churn_24 = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False)
                     churn = np.vstack([churn, churn_24])
-                    
+
         elif ofertas['tipo_oferta'][i] == 'descuento':
-            
+
             if ofertas['id_oferta'][i].split('_')[2] == 'indef':
                 duracion = 24
             else:
                 duracion = int(ofertas['id_oferta'][i].split('_')[2])
-                
+
             if ofertas['tipo_churn'][i] == 'delta':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
@@ -316,8 +318,8 @@ def churn_24(df):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = churn_esp
                     churn_24 = churn_post_oferta(churn_orig, churn_nvo, duracion)
-                    churn = np.vstack([churn, churn_24])                    
-                    
+                    churn = np.vstack([churn, churn_24])
+
         churn_oferta[ofertas['id_oferta'][i]] = pd.concat([df['msisdn_id'], pd.DataFrame(data=churn)], axis=1)
-        
+
     return churn_oferta
