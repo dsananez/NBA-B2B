@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def costo_plataforma(df, t_util = 8, efic_rep = 0.75, dias_lab = 6, q_sem = 4):
+def costo_plataforma(df, t_util = 8, efic_rep = 0.65, dias_lab = 6, q_sem = 4.33):
     """
     Calcula costes de plataforma IN/OUT, donde
         df: data frame con columna tipo_oferta
