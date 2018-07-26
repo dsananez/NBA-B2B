@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def costo_plataforma(df, t_util = 8, efic_rep = 0.65, dias_lab = 6, q_sem = 4.33):
+def costo_plataforma(df, ofertas, t_util = 8, efic_rep = 0.65, dias_lab = 6, q_sem = 4):
     """
     Calcula costes de plataforma IN/OUT, donde
         df: data frame con columna tipo_oferta
@@ -11,7 +11,7 @@ def costo_plataforma(df, t_util = 8, efic_rep = 0.65, dias_lab = 6, q_sem = 4.33
         q_sem: cantidad de semanas al mes
     :return:
     """
-    ofertas = pd.read_csv('modelo_plataforma_cc.txt', sep=",")
+    #ofertas = pd.read_csv('modelo_plataforma_cc.txt', sep=",")
     ofertas['cost_plat_in'] = 0
     ofertas['cost_plat_out'] = ofertas['cost_hora_pos']*ofertas['dur_llam_out']/ofertas['efic_rep']
 
@@ -48,7 +48,7 @@ def costo_campana(df):
     cost_campana_df = pd.DataFrame(data=cost_campana)
     return cost_campana_df
 
-def costo_total(df, t_util = 8, efic_rep = 0.75, dias_lab = 6, q_sem = 4):
+def costo_total(df, plataforma, t_util = 8, efic_rep = 0.65, dias_lab = 6, q_sem = 4):
     """
     Corre las 3 funciones anteriores, donde
         df: data frame con columna tipo_oferta
@@ -59,12 +59,12 @@ def costo_total(df, t_util = 8, efic_rep = 0.75, dias_lab = 6, q_sem = 4):
     :return:
     """
 
-    cost_plat = costo_plataforma(df, t_util, efic_rep, dias_lab, q_sem)
+    cost_plat = costo_plataforma(df, plataforma, t_util, efic_rep, dias_lab, q_sem)
     cost_sac = costo_sac(df)
     cost_campana = costo_campana(pd.concat([cost_plat, cost_sac], axis=1))
     return cost_campana
 
-def fact_24(df):
+def fact_24(df,ofertas):
     """
     Calcula facturacion estimada proximos 24 meses, donde
         df: data frame con columnas:
@@ -75,7 +75,7 @@ def fact_24(df):
     """
 
     fact_oferta = {}
-    ofertas = pd.read_csv('listado_campanas.txt', sep=",")
+    #ofertas = pd.read_csv('listado_campanas.txt', sep=",")
 
     for i in range(0,len(ofertas)):
         fact_esp = ofertas['fact_esp'][i]
@@ -164,7 +164,7 @@ def fact_24(df):
                     fact = np.vstack([fact, fact_24])
 
 
-        fact_oferta[ofertas['id_oferta'][i]] = pd.concat([df['msisdn_id'], pd.DataFrame(data=fact)], axis=1)
+        fact_oferta[ofertas['id_oferta'][i]] = pd.concat([df['ani'], pd.DataFrame(data=fact)], axis=1)
 
     return fact_oferta
 
@@ -191,7 +191,7 @@ def churn_post_oferta(churn_orig, churn_nvo, dur_oferta, progresivo = True):
 
     return churn_of + churn_blin + churn_po
 
-def churn_24(df):
+def churn_24(df,ofertas):
     """
     Calcula churn estimado proximos 24 meses, donde
         df: data frame con columnas:
@@ -202,7 +202,7 @@ def churn_24(df):
     """
 
     churn_oferta = {}
-    ofertas = pd.read_csv('listado_campanas.txt', sep=",")
+    #ofertas = pd.read_csv('listado_campanas.txt', sep=",")
 
     for i in range(0,len(ofertas)):
         churn_esp = ofertas['churn_esp_n1'][i]
@@ -320,6 +320,6 @@ def churn_24(df):
                     churn_24 = churn_post_oferta(churn_orig, churn_nvo, duracion)
                     churn = np.vstack([churn, churn_24])
 
-        churn_oferta[ofertas['id_oferta'][i]] = pd.concat([df['msisdn_id'], pd.DataFrame(data=churn)], axis=1)
+        churn_oferta[ofertas['id_oferta'][i]] = pd.concat([df['ani'], pd.DataFrame(data=churn)], axis=1)
 
     return churn_oferta
