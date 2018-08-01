@@ -163,6 +163,20 @@ def fact_24(df,ofertas):
                     fact_24 = list(np.repeat(fact_esp, duracion)) + list(np.repeat(df['fact'][k], 24-duracion))
                     fact = np.vstack([fact, fact_24])
 
+        elif ofertas['tipo_oferta'][i] == 'estrategica':
+
+            if ofertas['tipo_fact'][i] == 'delta':
+                for k in range(0,len(df)):
+                    fact_24 = list(np.repeat(df['fact'][k] + fact_esp, 24))
+                    fact = np.vstack([fact, fact_24])
+            elif ofertas['tipo_fact'][i] == 'aumento_porct':
+                for k in range(0,len(df)):
+                    fact_24 = list(np.repeat(df['fact'][k]*(1+fact_esp), 24))
+                    fact = np.vstack([fact, fact_24])
+            elif ofertas['tipo_fact'][i] == 'fijo':
+                for k in range(0,len(df)):
+                    fact_24 = list(np.repeat(fact_esp, 24))
+                    fact = np.vstack([fact, fact_24])
 
         fact_oferta[ofertas['id_oferta'][i]] = pd.concat([df['ani'], pd.DataFrame(data=fact)], axis=1)
 
@@ -318,6 +332,27 @@ def churn_24(df,ofertas):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = churn_esp
                     churn_24 = churn_post_oferta(churn_orig, churn_nvo, duracion)
+                    churn = np.vstack([churn, churn_24])
+
+        elif ofertas['tipo_oferta'][i] == 'estrategica':
+
+            if ofertas['tipo_churn'][i] == 'delta':
+                for k in range(0,len(df)):
+                    churn_orig = df['churn_calibrated'][k]
+                    churn_nvo = df['churn_calibrated'][k] + churn_esp
+                    churn_24 = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False)
+                    churn = np.vstack([churn, churn_24])
+            elif ofertas['tipo_churn'][i] == 'aumento_porct':
+                for k in range(0,len(df)):
+                    churn_orig = df['churn_calibrated'][k]
+                    churn_nvo = df['churn_calibrated'][k]*(1+churn_esp)
+                    churn_24 = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False)
+                    churn = np.vstack([churn, churn_24])
+            elif ofertas['tipo_churn'][i] == 'fijo':
+                for k in range(0,len(df)):
+                    churn_orig = df['churn_calibrated'][k]
+                    churn_nvo = churn_esp
+                    churn_24 = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False)
                     churn = np.vstack([churn, churn_24])
 
         churn_oferta[ofertas['id_oferta'][i]] = pd.concat([df['ani'], pd.DataFrame(data=churn)], axis=1)
