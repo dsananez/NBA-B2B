@@ -163,7 +163,7 @@ def fact_t(df,ofertas,t):
 
     return fact_oferta
 
-def churn_post_oferta(churn_orig, churn_nvo, dur_oferta, progresivo = True, t):
+def churn_post_oferta(churn_orig, churn_nvo, dur_oferta, progresivo = True, t=24):
     """
     Calcula churn estimado al vencimiento de una oferta, donde
         churn_orig: churn antes de aceptar la oferta
