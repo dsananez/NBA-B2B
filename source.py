@@ -75,13 +75,20 @@ def fact_t(df,ofertas,t):
     """
 
     fact_oferta = {}
+
+
     #ofertas = pd.read_csv('listado_campanas.txt', sep=",")
 
     for i in range(0,len(ofertas)):
         fact_esp = ofertas['fact_esp'][i]
         duracion = ofertas['duracion'][i]
+
+        
         if duracion == -1:
             duracion = t
+        if duracion >= t:
+            duracion = t
+        
         fact = np.array([], dtype=np.float).reshape(0,t)
 
         if ofertas['tipo_oferta'][i] == 'cater':
@@ -128,7 +135,12 @@ def fact_t(df,ofertas,t):
                 for k in range(0,len(df)):
                     fact_t = list(np.repeat(fact_esp, t))
                     fact = np.vstack([fact, fact_t])
-
+            elif ofertas['tipo_fact'][i] == 'bonificacion':
+                for k in range(0,len(df)):
+                    desc = float(int(ofertas['id_oferta'][i].split('_')[1])/100)
+                    fact_t = list(np.repeat(df['fact'][k]*+(1-desc)*fact_esp, duracion)) + list(np.repeat(df['fact'][k]+fact_esp, t-duracion))
+                    fact = np.vstack([fact, fact_t])
+                    
         elif ofertas['tipo_oferta'][i] == 'up_sell':
 
             if ofertas['tipo_fact'][i] == 'delta':
@@ -143,6 +155,10 @@ def fact_t(df,ofertas,t):
                 for k in range(0,len(df)):
                     fact_t = list(np.repeat(fact_esp, t))
                     fact = np.vstack([fact, fact_t])
+            elif ofertas['tipo_fact'][i] == 'externa':
+                for k in range(0,len(df)):
+                    fact_t = list(np.repeat(df['fact'][k]+df['delta_arpu_promo'][k], duracion)) + list(np.repeat(df['fact'][k]+df['delta_arpu_fin_promo'][k], t-duracion))
+                    fact = np.vstack([fact,fact_t])
 
         elif ofertas['tipo_oferta'][i] == 'descuento':
 
@@ -220,6 +236,8 @@ def churn_t(df,ofertas,t):
         duracion = ofertas['duracion'][i]
         if duracion == -1:
             duracion = t
+        if duracion >= t:
+            duracion = t
 
         if ofertas['tipo_oferta'][i] == 'cater':
 
@@ -269,19 +287,19 @@ def churn_t(df,ofertas,t):
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = df['churn_calibrated'][k] + churn_esp
-                    churn_t = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False, t=t)
+                    churn_t = churn_post_oferta(churn_orig, churn_nvo, duracion, progresivo = True, t=t)
                     churn = np.vstack([churn, churn_t])
             elif ofertas['tipo_churn'][i] == 'aumento_porct':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = df['churn_calibrated'][k]*(1+churn_esp)
-                    churn_t = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False, t=t)
+                    churn_t = churn_post_oferta(churn_orig, churn_nvo, duracion, progresivo = True, t=t)
                     churn = np.vstack([churn, churn_t])
             elif ofertas['tipo_churn'][i] == 'fijo':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = churn_esp
-                    churn_t = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False, t=t)
+                    churn_t = churn_post_oferta(churn_orig, churn_nvo, duracion, progresivo = True, t=t)
                     churn = np.vstack([churn, churn_t])
 
         elif ofertas['tipo_oferta'][i] == 'up_sell':
@@ -290,19 +308,19 @@ def churn_t(df,ofertas,t):
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = df['churn_calibrated'][k] + churn_esp
-                    churn_t = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False, t=t)
+                    churn_t = churn_post_oferta(churn_orig, churn_nvo, duracion, progresivo = True, t=t)
                     churn = np.vstack([churn, churn_t])
             elif ofertas['tipo_churn'][i] == 'aumento_porct':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = df['churn_calibrated'][k]*(1+churn_esp)
-                    churn_t = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False, t=t)
+                    churn_t = churn_post_oferta(churn_orig, churn_nvo, duracion, progresivo = True, t=t)
                     churn = np.vstack([churn, churn_t])
             elif ofertas['tipo_churn'][i] == 'fijo':
                 for k in range(0,len(df)):
                     churn_orig = df['churn_calibrated'][k]
                     churn_nvo = churn_esp
-                    churn_t = churn_post_oferta(churn_orig, churn_nvo, 12, progresivo = False, t=t)
+                    churn_t = churn_post_oferta(churn_orig, churn_nvo, duracion, progresivo = True, t=t)
                     churn = np.vstack([churn, churn_t])
 
         elif ofertas['tipo_oferta'][i] == 'descuento':

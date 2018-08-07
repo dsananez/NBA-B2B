@@ -7,3 +7,6 @@ cross_mod,cross_sell,-1,0.10,aumento_porct,-0.3,aumento_porct,0.1,0.15,0,0,2.7
 bono_2g_6,bono,6,0.0,aumento_porct,-0.5,aumento_porct,0.5,0.85,0,0,2.7
 ftth_1,cross_sell,-1,1000,delta,-0.5,aumento_porct,0.05,0.08,0,600,2.7
 fact_sp,refuerzo,-1,0,delta,-0.1,aumento_porct,0.05,0.08,0,0,2.7
+cater_gama_a,cater,1,7438,delta,-0.8,aumento_porct,0.035,0.035,0,300,0
+cater_gama_m,cater,1,2900,delta,-0.8,aumento_porct,0.035,0.035,0,300,0
+cater_gama_b,cater,1,418,delta,-0.8,aumento_porct,0.035,0.035,0,300,0
